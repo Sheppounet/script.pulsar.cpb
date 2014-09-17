@@ -7,7 +7,7 @@ import urllib
 import urllib2
 import xbmc
 import xbmcaddon
-from resources.lib import bencode
+import bencode
 from threading import Thread
 import Queue
 import CommonFunctions
