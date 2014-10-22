@@ -3,6 +3,11 @@ script.pulsar.cpb
 
 CPasBien (French) Pulsar provider for XBMC
 
-Note
+History : 
+_________________
+Version 0.2.0 : 
+- Updated for Pulsar 0.2
+- Use French title when available
 
-This provider doesn't totally work yet. Content may have trouble with english/french title.
+Version 0.0.1
+- Initial version for Pulsar 0.1

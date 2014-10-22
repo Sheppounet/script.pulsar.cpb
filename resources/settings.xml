@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
   <setting label="URL" type="text" id="base_url" default="http://cpasbien.pe"/>
+  <setting label="Forcer les titres VO" type="bool" id="vo" default="false"/>
 </settings>

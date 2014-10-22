@@ -1,88 +1,71 @@
-import sys
-import json
-import base64
-import hashlib
 import re
-import urllib
-import urllib2
-import xbmc
-import xbmcaddon
-import bencode
-from threading import Thread
-import Queue
 import CommonFunctions
-
-PAYLOAD = json.loads(base64.b64decode(sys.argv[1]))
+from pulsar import provider
 
 # Addon Script information
-__addonID__ = str(sys.argv[0])
-__addon__ = xbmcaddon.Addon(__addonID__)
-__baseUrl__ = __addon__.getSetting("base_url")
+__baseUrl__ = provider.ADDON.getSetting("base_url")
+__vo__ = provider.ADDON.getSetting("vo")
 
 # ParseDOM init
 common = CommonFunctions
-common.plugin = __addonID__
+common.plugin = str(sys.argv[0])
 
 ACTION_SEARCH = "recherche"
 ACTION_FILMS = "films/"
 ACTION_SERIES = "series/"
-USERAGENT = "Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11"
 
+# Raw search - query is always a string
 def search(query):
-    result = []
-    threads = []
-    q = Queue.Queue()
+    provider.log.info("QUERY : %s" % query)
+    if(query['query']) : 
+        query = query['query']
     # Replace non-alphanum caracters by -, then replace the custom "5number" tags by true folder
     query = re.sub('[^0-9a-zA-Z]+', '-', query)
-    query = urllib.quote_plus(query)
+    query = provider.quote_plus(query)
     query = query.replace('11111',ACTION_SERIES).replace('22222',ACTION_FILMS)
-    xbmc.log("Search URL : %s/%s/%s.html" % (__baseUrl__, ACTION_SEARCH, query), xbmc.LOGDEBUG)
-    url = urllib2.Request("%s/%s/%s.html" % (__baseUrl__, ACTION_SEARCH, query))
-    url.add_header('User-Agent', USERAGENT)
-    response = urllib2.urlopen(url)
-    data = response.read()
-    if response.headers.get("Content-Encoding", "") == "gzip":
-        import zlib
-        data = zlib.decompressobj(16 + zlib.MAX_WBITS).decompress(data)
+    provider.log.info("GET : %s/%s/%s.html" % (__baseUrl__, ACTION_SEARCH, query))
+    resp = provider.GET("%s/%s/%s.html" % (__baseUrl__, ACTION_SEARCH, query))
 
     # Parse result
-    liens = common.parseDOM(data, 'a', attrs = { "class": "lien-rechercher" }, ret = 'href')
-    #for torrent in re.findall(r"%s\/dl-torrent\/.*\.html" % (__baseUrl__), data) :
-    for torrent in liens :
-        xbmc.log('Transform torrent : %s' % torrent, xbmc.LOGDEBUG)
-        torrent = str(torrent).rpartition('/')[2]
-        torrent = __baseUrl__ + "/_torrents/" + torrent.replace(".html",".torrent")
+    liens = common.parseDOM(resp.data, 'a', attrs = { "class": "lien-rechercher" }, ret = 'href')
+    #for torrent in re.findall(r"%s\/dl-torrent\/.*\.html" % (__baseUrl__),data) :
+    return [{"uri": __baseUrl__ + "/_torrents/" + torrent.rpartition('/')[2].replace(".html",".torrent")} for torrent in liens]
 
-        # Call each individual page in parallel
-        thread = Thread(target=torrent2magnet, args = (torrent, q))
-        thread.start()
-        threads.append(thread)
-        
-    # And get all the results
-    for t in threads :
-        t.join()
-    while not q.empty():
-        result.append({"uri": q.get()})
-    return result
+# Episode Payload Sample
+# {
+# "imdb_id": "tt0092400",
+# "tvdb_id": "76385",
+# "title": "married with children",
+# "season": 1,
+# "episode": 1,
+# "titles": null
+# }
+def search_episode(episode):
+    provider.log.debug("Search episode : name %(title)s, season %(season)02d, episode %(episode)02d" % episode)
+    return search({'query':"11111%(title)s S%(season)02dE%(episode)02d" % episode})
 
-def search_episode(imdb_id, tvdb_id, name, season, episode):
-    xbmc.log('Search episode : name %s, season %s, episode %s' % (name, season, episode), xbmc.LOGDEBUG)
-    return search("11111%s S%02dE%02d" % (name, season, episode))
+# Movie Payload Sample
+# Note that "titles" keys are countries, not languages
+# The titles are also normalized (accents removed, lower case etc...)
+# {
+# "imdb_id": "tt1254207",
+# "title": "big buck bunny",
+# "year": 2008,
+# "titles": {
+# "es": "el gran conejo",
+# "nl": "peach open movie project",
+# "ru": "??????? ??????",
+# "us": "big buck bunny short 2008"
+# }
+# }
+def search_movie(movie):
+    provider.log.info(movie['titles'])
+    if(movie['titles'].has_key('fr') and __vo__ == 'false'):
+        title = movie['titles']['fr']
+    else :
+        title = movie['title']
+    provider.log.info("Search movie : title %s, year %s" % (title, movie['year']))
+    return search({'query':"22222%s %s" % (title, movie['year'])})
 
-def search_movie(imdb_id, name, year):
-    xbmc.log('Search movie : name %s, year %s' % (name, year), xbmc.LOGDEBUG)
-    return search("22222%s %s" % (name, year))
-
-def torrent2magnet(torrent_url, q):
-    response = urllib2.urlopen(torrent_url)
-    torrent = response.read()
-    metadata = bencode.bdecode(torrent)
-    hashcontents = bencode.bencode(metadata['info'])
-    digest = hashlib.sha1(hashcontents).digest()
-    b32hash = base64.b32encode(digest)
-    magneturl = 'magnet:?xt=urn:btih:' + b32hash + '&dn=' + metadata['info']['name']
-    xbmc.log('Put Magnet in queue : %s' % magneturl, xbmc.LOGDEBUG)
-    q.put(magneturl)
-
-urllib2.urlopen(PAYLOAD["callback_url"],
-    data = json.dumps(globals()[PAYLOAD["method"]](*PAYLOAD["args"])))
+# Registers the module in Pulsar
+provider.register(search, search_movie, search_episode)
