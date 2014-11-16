@@ -1,15 +1,16 @@
 import re
+import unicodedata
 import CommonFunctions
 from pulsar import provider
 
 # Addon Script information
 __baseUrl__ = provider.ADDON.getSetting("base_url")
-__vo__ = provider.ADDON.getSetting("vo")
 
 # ParseDOM init
 common = CommonFunctions
 common.plugin = str(sys.argv[0])
-
+tmdbUrl = 'http://api.themoviedb.org/3'
+tmdbKey = '8d0e4dca86c779f4157fc2c469c372ca'    # mancuniancol's API Key.
 ACTION_SEARCH = "recherche"
 ACTION_FILMS = "films/"
 ACTION_SERIES = "series/"
@@ -19,6 +20,8 @@ def search(query):
     provider.log.info("QUERY : %s" % query)
     if(query['query']) : 
         query = query['query']
+    query_normalize = unicodedata.normalize('NFKD',query)
+    query = ''.join(c for c in query_normalize if (not unicodedata.combining(c)))
     # Replace non-alphanum caracters by -, then replace the custom "5number" tags by true folder
     query = re.sub('[^0-9a-zA-Z]+', '-', query)
     query = provider.quote_plus(query)
@@ -41,7 +44,15 @@ def search(query):
 # "titles": null
 # }
 def search_episode(episode):
-    provider.log.debug("Search episode : name %(title)s, season %(season)02d, episode %(episode)02d" % episode)
+    provider.log.info("Search episode : name %(title)s, season %(season)02d, episode %(episode)02d" % episode)
+    response = provider.GET("%s/find/%s?api_key=%s&language=fr&external_source=imdb_id" % (tmdbUrl, episode['imdb_id'], tmdbKey))
+    provider.log.debug(response)
+    if response != (None, None):
+        name_normalize = unicodedata.normalize('NFKD',response.json()['tv_results'][0]['name'])
+        episode['title'] = ''.join(c for c in name_normalize if (not unicodedata.combining(c)))
+        provider.log.debug('FRENCH title :  %s' % episode['title'])
+    else :
+        provider.log.error('Error when calling TMDB. Use Pulsar movie data.')
     return search({'query':"11111%(title)s S%(season)02dE%(episode)02d" % episode})
 
 # Movie Payload Sample
@@ -59,13 +70,17 @@ def search_episode(episode):
 # }
 # }
 def search_movie(movie):
-    provider.log.info(movie['titles'])
-    if(movie['titles'].has_key('fr') and __vo__ == 'false'):
-        title = movie['titles']['fr']
+    # Pulsar 0.2 doesn't work well with foreing title.  Get the FRENCH title from TMDB
+    provider.log.debug('Get FRENCH title from TMDB for %s' % movie['imdb_id'])
+    response = provider.GET("%s/movie/%s?api_key=%s&language=fr&external_source=imdb_id&append_to_response=alternative_titles" % (tmdbUrl, movie['imdb_id'], tmdbKey))
+    if response != (None, None):
+        title_normalize = unicodedata.normalize('NFKD',response.json()['title'])
+        movie['title'] = ''.join(c for c in title_normalize if (not unicodedata.combining(c)))
+        provider.log.info('FRENCH title :  %s' % movie['title'])
     else :
-        title = movie['title']
-    provider.log.info("Search movie : title %s, year %s" % (title, movie['year']))
-    return search({'query':"22222%s %s" % (title, movie['year'])})
+        provider.log.error('Error when calling TMDB. Use Pulsar movie data.')
+    provider.log.info("Search movie : title %s, year %s" % (movie['title'], movie['year']))
+    return search({'query':"22222%s %s" % (movie['title'], movie['year'])})
 
 # Registers the module in Pulsar
 provider.register(search, search_movie, search_episode)

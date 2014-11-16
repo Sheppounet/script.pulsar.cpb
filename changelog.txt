@@ -1,3 +1,7 @@
+Version 0.2.1
+- Ajout d'une icone
+- Utilise les titres Francais directement depuis TMDB
+
 Version 0.2.0
 - Refonte du code pour s'adapter a Pulsar 0.2
 
