@@ -32,6 +32,7 @@
   <ItemGroup>
     <Content Include="addon.xml" />
     <Content Include="changelog.txt" />
+    <Content Include="icon.png" />
     <Content Include="README.md" />
     <Content Include="resources\settings.xml" />
   </ItemGroup>
