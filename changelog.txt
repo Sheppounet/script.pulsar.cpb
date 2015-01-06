@@ -1,3 +1,10 @@
+# 0.4.0
+- Correction URI retournee suite a refonte du site
+- Optimisation REGEX de filtrage pour cibler exclusivement films ou series + recuperer le nom du torrent
+- Ajout du nom du torrent au payload, pour passer le nouveau filtre des episodes
+- Hack manuel pour certaines series dont le nom FR n'est pas reconnu sur CPB
+- Compatibilite Pulsar 0.4.x
+
 # 0.3.0
 - Compatibilite Pulsar 0.3.x
 - Changement du parsing suite a refonte du site
