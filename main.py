@@ -82,7 +82,7 @@ def search_movie(movie):
     else :
         provider.log.error('Error when calling TMDB. Use Pulsar movie data.')
     provider.log.info("Search movie : title %s, year %s" % (movie['title'], movie['year']))
-    return search("22222%s %s" % (movie['title'], movie['year']))
+    return search("22222%s" % (movie['title']))
 
 # Registers the module in Pulsar
 provider.register(search, search_movie, search_episode)
