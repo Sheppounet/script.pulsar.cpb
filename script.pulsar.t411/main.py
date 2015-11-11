@@ -174,10 +174,10 @@ def setTerms():
     termList[17] = [540,541,542,719,720,721,722,1160]
 
     # Get all settings correspondance
-    for term in termList:
+    for idx, term in enumerate(termList):
         for iTerm in term:
             if provider.ADDON.getSetting('%s' % iTerm) == 'true':
-               pref_terms += '&term[%s][]=%s' % (term, iTerm)
+               pref_terms += '&term[%s][]=%s' % (idx, iTerm)
 
 def torrent2magnet(t, q, token):
     torrentdl = '/torrents/download/%s' % t["id"]
