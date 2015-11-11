@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
-  <setting label="URL" type="text" id="base_url" default="http://www.cpasbien.pw"/>
+  <setting label="URL" type="text" id="base_url" default="http://www.cpasbien.io"/>
 </settings>
