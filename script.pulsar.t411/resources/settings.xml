@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+  <category label="Compte T411">
+    <setting label="Compte T411" type="lsep"/>
+    <setting label="URL" type="text" id="base_url" default="https://api.t411.in"/>
+    <setting label="Login" type="text" id="username" default=""/>
+    <setting label="Password" type="text" id="password" default="" option="hidden"/>
+    <setting label="Options avancées" type="lsep"/>
+    <setting label="Titre natif + VF" type="bool" id="titreVF" default="false"/>
+  </category>
+  <!--<category label="Filtres">-->
+    <category label="Vidéo - Qualité">
+      <setting type="bool" label="DVDrip [Rip depuis DVD-R]" id="10" default="true" />
+      <setting type="bool" label="TVrip [Rip SD (non HD) depuis Source HD/SD]" id="11" default="true" />
+      <setting type="bool" label="TVripHD 1080 [Rip HD depuis Source HD]" id="1162" default="true" />
+      <setting type="bool" label="Bluray 4K [Full ou Remux]" id="1171" default="false" />
+      <setting type="bool" label="WEBripHD 1080" id="1174" default="true" />
+      <setting type="bool" label="WEBripHD 720" id="1175" default="true" />
+      <setting type="bool" label="WEBRipHD 4K" id="1182" default="false" />
+      <setting type="bool" label="TVripHD 720 [Rip HD depuis Source HD]" id="12" default="true" />
+      <setting type="bool" label="DVD-R 5 [DVD &lt; 4.37GB]" id="13" default="true" />
+      <setting type="bool" label="DVD-R 9 [DVD &gt; 4.37GB]" id="14" default="true" />
+      <setting type="bool" label="HDrip 720 [Rip HD depuis Bluray]" id="15" default="true" />
+      <setting type="bool" label="HDrip 1080 [Rip HD depuis Bluray]" id="16" default="true" />
+      <setting type="bool" label="Bluray [Full ou Remux]" id="17" default="true" />
+      <setting type="bool" label="VCD/SVCD/VHSrip" id="18" default="false" />
+      <setting type="bool" label="WEBrip" id="19" default="true" />
+      <setting type="bool" label="BDrip [Rip SD (non HD) depuis Bluray]" id="8" default="true" />
+      <setting type="bool" label="BRrip [Rip SD (non HD) depuis HDrip]" id="9" default="true" />
+    </category>
+    <category label="Vidéo - Type">
+      <setting type="bool" label="2D (Standard)" id="22" default="true" />
+      <setting type="bool" label="3D Natif (Production)" id="23" default="false" />
+      <setting type="bool" label="3D Converti (Post-Production)" id="24" default="false" />
+      <setting type="bool" label="3D Converti (Non officiel/Amateur)" id="1045" default="false" />
+    </category>
+    <category label="Audio - Langue">
+      <setting type="bool" label="Anglais" id="540" default="false" />
+      <setting type="bool" label="Français (VFF/Truefrench)" id="541" default="true" />
+      <setting type="bool" label="Multi (Français inclus)" id="542" default="true" />
+      <setting type="bool" label="Québécois (VFQ/French)" id="719" default="true" />
+      <setting type="bool" label="VFSTFR" id="720" default="true" />
+      <setting type="bool" label="VOSTFR" id="721" default="false" />
+      <setting type="bool" label="Muet" id="722" default="false" />
+      <setting type="bool" label="Multi (Québécois inclus)" id="1160" default="false" />
+    </category>
+  <!--</category>-->
+</settings>
